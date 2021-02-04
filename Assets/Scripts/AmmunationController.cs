@@ -56,7 +56,6 @@ public class AmmunationController : MonoBehaviour
         LastShot = DateTime.Now;
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = false;
-        Debug.Log($"Verificação cursor");
     }
 
     // Update is called once per frame
@@ -66,7 +65,6 @@ public class AmmunationController : MonoBehaviour
         {
             isEscapePress = true;
             Cursor.visible = !Cursor.visible;
-            Debug.Log($"Apertou! cursor visivel1: {Cursor.visible}");
         }
         if (Input.GetKeyUp(KeyCode.Escape) && isEscapePress)
         {
@@ -109,7 +107,8 @@ public class AmmunationController : MonoBehaviour
             {
                 if (Hit.collider.gameObject.CompareTag("Target"))
                 {
-                    Debug.Log("Acertou um Alvo");
+                    Hit.collider.gameObject.GetComponent<TargetMovimentation>().selected = true;
+                    Hit.collider.gameObject.SetActive(false);
                 }
             }
         }

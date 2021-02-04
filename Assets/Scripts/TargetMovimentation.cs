@@ -7,9 +7,16 @@ public class TargetMovimentation : MonoBehaviour
 {
 
     private DateTime StopDate;
+    
+    public TextMesh TextComponent;
+
+    public bool selected = false;
+
+    public string Symbol = "S";
     // Start is called before the first frame update
     void Start()
     {
+        TextComponent.text = Symbol;
         StopDate = DateTime.MaxValue;
     }
 
@@ -31,7 +38,6 @@ public class TargetMovimentation : MonoBehaviour
 
             if (DateTime.Now.CompareTo(StopDate.AddSeconds(3)) > 0)
             {
-                Debug.Log("Reiniciar!");
                 Vector3 vector = transform.position;
                 vector.z = 10;
                 transform.position = vector;

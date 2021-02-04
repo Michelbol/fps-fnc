@@ -45,7 +45,6 @@ public class FPSMouse : MonoBehaviour
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = false;
         originalRotation = transform.rotation;
-        Debug.Log("Start FPS Mouse");
     }
 
     void LateUpdate()
@@ -60,13 +59,11 @@ public class FPSMouse : MonoBehaviour
         {
             isKeyEscapePressed = true;
             Cursor.visible = !Cursor.visible;
-            Debug.Log($"Apertou! Cursos visivel1: {Cursor.visible}");
         }
 
         if (Input.GetKeyUp(KeyCode.Escape) && isKeyEscapePressed)
         {
             isKeyEscapePressed = false;
-            Debug.Log($"Soltou! Cursos visivel1: {Cursor.visible}");
         }
     }
 
