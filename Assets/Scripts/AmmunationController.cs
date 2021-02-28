@@ -50,6 +50,8 @@ public class AmmunationController : MonoBehaviour
 
     private bool isEscapePress = false;
 
+    public bool GameEnable = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -61,6 +63,10 @@ public class AmmunationController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!GameEnable)
+        {
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.Escape) && !isEscapePress)
         {
             isEscapePress = true;

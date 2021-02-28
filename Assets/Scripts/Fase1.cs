@@ -7,33 +7,35 @@ using System;
 public class Fase1 : MonoBehaviour
 {
     public GameObject defaultTarget;
-    
+
     public string Grammar;
 
     [SerializeField] Text GrammarVisible;
 
+    [SerializeField] Text GenericText;
+
     public GameObject TimerLabel;
-    
+
     public float time;
 
     public GameObject Aim;
 
     private float DistanceIntoTargets = 3f;
-    
+
     private Quaternion defaultQuartenion = Quaternion.Euler(-90, -180, 0);
-    
+
     private Vector3 defaultVector3 = new Vector3(-3f, 4.45f, 0f);
-    
+    // Object into Fase with all rules, used to select when hit into a header
     private GameObject[] rules;
-
-    private GameObject[,] symbolRules;
-
+    // Inside of rules has N symbolRules is the terminal symbol
+    private List<List<GameObject>> symbolRules;
+    // Is Game Object of headers to hit
     private GameObject[] headerRules;
-    
+    // Game Object having all header rules
     private GameObject parentHeaderRules;
-
+    // Symbol not terminal(header rule) selected 
     private GameObject currentRule;
-
+    // Index of symbol not terminal(header rule) selected
     private int currentIndex = -1;
 
     private int Step = 1;
@@ -42,14 +44,27 @@ public class Fase1 : MonoBehaviour
 
     private int selectedHeader;
 
+    private string newRuleName = "C";
+
     private GameObject currentReplaceVariable;
 
     private GameObject currentReplaceVariable2;
 
+    public GameObject AmmoCounterPannel;
+
+    private AmmunationController AmmunationController;
+
     // Start is called before the first frame update
     void Start()
     {
+        AmmunationController = AmmoCounterPannel.GetComponent<AmmunationController>();
         ParseGramar();
+        UpdateVisibleGramar();
+        AmmunationController.GameEnable = false;
+    }
+
+    void UpdateVisibleGramar()
+    {
         GrammarVisible.text = GramarToString();
     }
 
@@ -60,17 +75,18 @@ public class Fase1 : MonoBehaviour
         {
             return;
         }
+        AmmunationController.GameEnable = true;
         //Step 1 - Selecionar uma regra para ser alterada
         if (Step == 1)
         {
-            if(!setupStep)
+            if (!setupStep)
             {
                 Debug.Log("Iniciando Step 1");
                 SetHeaderRuleActive();
                 setupStep = true;
             }
             int indexHeader = IsSomeHeaderSelected();
-            if(indexHeader != -1)
+            if (indexHeader != -1)
             {
                 SetHeaderRuleInactive();
                 SetRuleActive(indexHeader);
@@ -82,92 +98,146 @@ public class Fase1 : MonoBehaviour
             }
         }
         //Step 2 - Selecionar uma variavel para ser alterada
-        if(Step == 2)
+        if (Step == 2)
         {
             if (!setupStep)
             {
                 Debug.Log("Iniciando Step 2");
                 setupStep = true;
             }
-            int[] indexRule = IsSomeRuleSelected(selectedHeader);
-            if (indexRule[0] != -1)
+            List<GameObject> selectedObjects = IsSomeRuleSelected(selectedHeader);
+            if (selectedObjects.Count > 0)
             {
-                if(currentReplaceVariable == null)
+                if (currentReplaceVariable == null)
                 {
-                    currentReplaceVariable = symbolRules[selectedHeader, indexRule[0]];
+                    currentReplaceVariable = selectedObjects[0];
                 }
             }
-            if(indexRule[1] != -1)
+            if (selectedObjects.Count > 1)
             {
-                if (currentReplaceVariable2 == null)
-                {
-                    currentReplaceVariable2 = symbolRules[selectedHeader, indexRule[1]];
-                    Step = 3;
-                    setupStep = false;
-                    SetRuleInactive();
-                    currentIndex = -1;
-                    selectedHeader = -1;
-                }
+                currentReplaceVariable2 = selectedObjects[1];
+                Step = 3;
+                setupStep = false;
+                SetRuleInactive();
+                //currentIndex = -1;
+                //selectedHeader = -1;
             }
         }
         //Step 3 - Selecionar quais as variaveis dentro desta nova variavel
-        if(Step == 3)
+        if (Step == 3)
         {
             if (!setupStep)
             {
                 Debug.Log("Iniciando Step 3");
+                GenericText.text = $"Nova Regra\n {newRuleName} -> {currentReplaceVariable.name}{currentReplaceVariable2.name}";
+                symbolRules[selectedHeader].Add(
+                    CreateDefaultObject(
+                        currentReplaceVariable.transform,
+                        newRuleName,
+                        defaultVector3,
+                        false
+                    )
+                );
+                List<GameObject> objectsToDelete = new List<GameObject>();
+                objectsToDelete.Add(currentReplaceVariable);
+                objectsToDelete.Add(currentReplaceVariable2);
+                deleteVisibleRule(selectedHeader, objectsToDelete);
+                currentIndex = -1;
+                selectedHeader = -1;
                 SetHeaderRuleActive();
                 setupStep = true;
             }
             int indexHeader = IsSomeHeaderSelected();
             if (indexHeader != -1)
             {
-                //SetHeaderRuleInactive();
-                //SetRuleActive(indexHeader);
-                //selectedHeader = indexHeader;
-                //Step = 1;
+                //for(int i = 0; i < symbolRules.Length; i++)
+                //{
+                //   for (int j = 0; j < symbolRules.GetUpperBound(i); j++)
+                //  {
+                //     if (symbolRules[i,j].name == currentReplaceVariable.name && (j+1) < symbolRules.GetUpperBound(i) && symbolRules[i, j+1].name == currentReplaceVariable.name)
+                //    {
+                //       Debug.Log("Da pra ");
+                //  }
+                //}
+                //}
             }
         }
     }
 
     void ParseGramar()
     {
-        rules = new GameObject[Grammar.Split(',').Length];
-        headerRules = new GameObject[Grammar.Split(',').Length];
-        symbolRules = new GameObject[4,3];
-        var objectHeaderRule = new GameObject();
-        objectHeaderRule.name = "TargetHeaders";
-        objectHeaderRule.transform.parent = gameObject.transform;
-        objectHeaderRule.SetActive(false);
-        parentHeaderRules = objectHeaderRule;
-        for (int j = 0; j < Grammar.Split(',').Length; j++)
+        var gramarSplitComma = Grammar.Split(',');
+        rules = new GameObject[gramarSplitComma.Length];
+        headerRules = new GameObject[gramarSplitComma.Length];
+        symbolRules = new List<List<GameObject>>();
+        parentHeaderRules = CreateEmptyObject(
+            gameObject.transform,
+            "TargetHeaders",
+            false
+        );
+        for (int j = 0; j < gramarSplitComma.Length; j++)
         {
-            string[] chars = Grammar.Split(',')[j].Replace(" ", "").Split(new string[] { "->" }, StringSplitOptions.None);
-            var objectRule = new GameObject();
-            objectRule.transform.parent = gameObject.transform;
-            objectRule.name = chars[0];
-            objectRule.SetActive(false);
-            rules[j] = objectRule;
-            
-            headerRules[j] = Instantiate(defaultTarget, objectHeaderRule.transform);
-            headerRules[j].SetActive(true);
-            headerRules[j].transform.rotation = defaultQuartenion;
-            headerRules[j].transform.position = new Vector3(defaultVector3.x + (DistanceIntoTargets * j), defaultVector3.y, defaultVector3.z);
-            headerRules[j].name = chars[0].ToString();
-            headerRules[j].GetComponent<TargetMovimentation>().Symbol = chars[0].ToString();
+            string[] chars = gramarSplitComma[j].Replace(" ", "").Split(new string[] { "->" }, StringSplitOptions.None);
 
+            rules[j] = CreateEmptyObject(transform, chars[0], false);
+
+            headerRules[j] = CreateDefaultObject(
+                parentHeaderRules.transform,
+                chars[0].ToString(),
+                new Vector3(defaultVector3.x + (DistanceIntoTargets * j), defaultVector3.y, defaultVector3.z)
+                );
+
+            List<GameObject> ruleJ = new List<GameObject>();
 
             for (int i = 0; i < chars[1].Length; i++)
             {
-                var clone = Instantiate(defaultTarget, objectRule.transform);
-                clone.SetActive(true);
-                clone.transform.rotation = defaultQuartenion;
-                clone.transform.position = new Vector3(defaultVector3.x+(DistanceIntoTargets * i), defaultVector3.y, defaultVector3.z);
-                clone.name = chars[1][i].ToString();
-                clone.GetComponent<TargetMovimentation>().Symbol = chars[1][i].ToString();
-                symbolRules[j,i] = clone;
+                ruleJ.Add(
+                    CreateDefaultObject(
+                    rules[j].transform,
+                    chars[1][i].ToString(),
+                    new Vector3(
+                        defaultVector3.x + (DistanceIntoTargets * i),
+                        defaultVector3.y,
+                        defaultVector3.z
+                        )
+                    )
+                );
             }
+            symbolRules.Add(ruleJ);
         }
+    }
+
+    GameObject CreateDefaultObject(Transform transform, string name, Vector3 position, bool active = true)
+    {
+        var obj = Instantiate(defaultTarget, transform);
+        obj.SetActive(active);
+        obj.transform.rotation = defaultQuartenion;
+        obj.transform.position = position;
+        obj.name = name;
+        obj.GetComponent<TargetMovimentation>().Symbol = name;
+        return obj;
+    }
+
+    GameObject CreateEmptyObject(Transform transform, string name, bool active = true)
+    {
+        var obj = new GameObject();
+        obj.transform.parent = transform;
+        obj.name = name;
+        obj.SetActive(active);
+        return obj;
+    }
+
+    void deleteVisibleRule(int indexRule, List<GameObject> rules)
+    {
+        foreach (GameObject rule in rules)
+        {
+            GameObject findRule = symbolRules[indexRule].Find(x => x == rule);
+            Destroy(findRule);
+            symbolRules[indexRule].Remove(rule);
+        }
+
+        FixDistanceRule(indexRule);
+        UpdateVisibleGramar();
     }
 
     void SetRuleActive(int index)
@@ -210,20 +280,27 @@ public class Fase1 : MonoBehaviour
         }
     }
 
-    int[] IsSomeRuleSelected(int index)
+    void FixDistanceRule(int index)
     {
-        int[] selected = { -1, -1 };
-        int indexSelected = 0;
-        for (int i = 0; i < symbolRules.GetUpperBound(index); i++)
+        int i = 1;
+        foreach (GameObject rule in symbolRules[index])
         {
-            if (symbolRules[index, i].GetComponent<TargetMovimentation>().selected)
+            rule.transform.position = new Vector3(defaultVector3.x + (DistanceIntoTargets * i), defaultVector3.y, defaultVector3.z);
+            i++;
+        }
+    }
+
+    List<GameObject> IsSomeRuleSelected(int index)
+    {
+        List<GameObject> selectedRules = new List<GameObject>();
+        foreach (GameObject rule in symbolRules[index])
+        {
+            if (rule.GetComponent<TargetMovimentation>().selected)
             {
-                Debug.Log($"A regra selecionada é: {symbolRules[index, i].GetComponent<TargetMovimentation>().name}");
-                selected[indexSelected] = i;
-                indexSelected++;
+                selectedRules.Add(rule);
             }
         }
-        return selected;
+        return selectedRules;
     }
 
 
@@ -234,7 +311,7 @@ public class Fase1 : MonoBehaviour
 
     void SetRuleInactive()
     {
-        if(rules[currentIndex])
+        if (rules[currentIndex])
         {
             rules[currentIndex].SetActive(false);
         }
@@ -242,25 +319,28 @@ public class Fase1 : MonoBehaviour
 
     string GramarToString()
     {
-        string FullGrammar = "";
-        string[] text = Grammar.Split(',');
-        foreach (var grammar in text)
+        string FullGrammar = "Gramática";
+        for (int i = 0; i < headerRules.Length; i++)
         {
-            FullGrammar = $"{FullGrammar}\n {grammar}";
+            FullGrammar = $"{FullGrammar}\n {headerRules[i].name} -> ";
+            foreach (GameObject rule in symbolRules[i])
+            {
+                FullGrammar = $"{FullGrammar}{rule.name}";
+            }
         }
         return FullGrammar;
     }
 
     bool startTimer(int maxSeconds = 0)
     {
-        
-        if (maxSeconds > 0 && (time+Time.deltaTime)%60 > maxSeconds)
+
+        if (maxSeconds > 0 && (time + Time.deltaTime) % 60 > maxSeconds)
         {
             Aim.SetActive(true);
             TimerLabel.SetActive(false);
             return false;
         }
-       
+
         Aim.SetActive(false);
         TimerLabel.SetActive(true);
         time += Time.deltaTime;
@@ -268,10 +348,6 @@ public class Fase1 : MonoBehaviour
         var minutes = time / 60;
         var seconds = time % 60;
         var fraction = (time * 100) % 1000;
-        Debug.Log($"Time: {time}");
-        Debug.Log($"minutes: {minutes}");
-        Debug.Log($"seconds: {seconds}");
-        Debug.Log($"fraction: {fraction}");
         TimerLabel.GetComponent<Text>().text = $"{Math.Truncate(minutes)}: {Math.Truncate(seconds)}: {Math.Truncate(fraction)}";
         return true;
     }
