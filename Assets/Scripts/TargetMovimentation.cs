@@ -12,6 +12,8 @@ public class TargetMovimentation : MonoBehaviour
 
     public bool selected = false;
 
+    public float speed = 1f;
+
     public string Symbol = "S";
     // Start is called before the first frame update
     void Start()
@@ -26,7 +28,7 @@ public class TargetMovimentation : MonoBehaviour
         if (transform.position.z >= -10)
         {
             Vector3 vector = transform.position;
-            vector.z -= 0.1f;
+            vector.z -= 0.1f * speed;
             transform.position = vector;
         }
         else

@@ -121,7 +121,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6643143588659961728}
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0.7071068, w: 0}
-  m_LocalPosition: {x: -1.06, y: 4.45, z: 10}
+  m_LocalPosition: {x: -1.06, y: 2.45, z: 10}
   m_LocalScale: {x: 20, y: 20, z: 20}
   m_Children:
   - {fileID: 2770471954666514827}
@@ -201,6 +201,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TextComponent: {fileID: 598013559581685062}
+  selected: 0
+  speed: 1
   Symbol: S
 --- !u!1 &6960134825750384308
 GameObject:

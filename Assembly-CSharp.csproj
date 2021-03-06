@@ -58,9 +58,10 @@
      <Compile Include="Assets\Scripts\AmmunationController.cs" />
      <Compile Include="Assets\Scripts\FPSController.cs" />
      <Compile Include="Assets\Scripts\FPSMouse.cs" />
-     <Compile Include="Assets\Scripts\Fase1.cs" />
      <Compile Include="Assets\Scripts\GunSound.cs" />
+     <Compile Include="Assets\Scripts\LoadScenes.cs" />
      <Compile Include="Assets\Scripts\ShootingBoothNumber.cs" />
+     <Compile Include="Assets\Scripts\Stage1.cs" />
      <Compile Include="Assets\Scripts\TargetMovimentation.cs" />
      <None Include="Assets\Jeremy\Docs\MaleCharacterAnimation.txt" />
  <Reference Include="UnityEngine">

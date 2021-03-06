@@ -56,8 +56,6 @@ public class AmmunationController : MonoBehaviour
     void Start()
     {
         LastShot = DateTime.Now;
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -66,11 +64,6 @@ public class AmmunationController : MonoBehaviour
         if (!GameEnable)
         {
             return;
-        }
-        if (Input.GetKeyDown(KeyCode.Escape) && !isEscapePress)
-        {
-            isEscapePress = true;
-            Cursor.visible = !Cursor.visible;
         }
         if (Input.GetKeyUp(KeyCode.Escape) && isEscapePress)
         {

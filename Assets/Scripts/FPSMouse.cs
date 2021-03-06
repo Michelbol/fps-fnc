@@ -43,7 +43,6 @@ public class FPSMouse : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = false;
         originalRotation = transform.rotation;
     }
 
