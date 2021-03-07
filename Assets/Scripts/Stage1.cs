@@ -60,7 +60,11 @@ public class Stage1 : MonoBehaviour
 
     public GameObject AmmoCounterPannel;
 
+    public GameObject alert;
+
     private AmmunationController AmmunationController;
+
+    private AlertController alertController;
 
     public bool TutorialOk = false;
 
@@ -70,6 +74,7 @@ public class Stage1 : MonoBehaviour
     void Start()
     {
         AmmunationController = AmmoCounterPannel.GetComponent<AmmunationController>();
+        alertController = alert.GetComponent<AlertController>();
         ParseGramar();
         UpdateVisibleGramar();
         AmmunationController.GameEnable = false;
@@ -77,12 +82,12 @@ public class Stage1 : MonoBehaviour
 
     void UpdateVisibleGramar()
     {
-        GrammarVisible.text = GramarToString();       
+        GrammarVisible.text = GramarToString();
     }
 
     void DestroyRules()
     {
-        if(rules == null)
+        if (rules == null)
         {
             return;
         }
@@ -160,10 +165,8 @@ public class Stage1 : MonoBehaviour
         {
             if (startTimer(3))
             {
-                Debug.Log("Esperando timer");
                 return;
             }
-            Debug.Log("Timer Acabou????");
             Target.SetActive(true);
             AmmunationController.GameEnable = true;
             changeStep(1);
@@ -180,23 +183,24 @@ public class Stage1 : MonoBehaviour
             int indexHeader = IsSomeHeaderSelected();
             if (indexHeader != -1)
             {
+                if (!selectHeaderHasMoreThanTwoVariables(indexHeader))
+                {
+                    //AVISO: Gramática não pode ser substituida
+                    SetHeaderNotSelected();
+                    SetHeaderActive();
+                    alertController.startTimer("Essa regra não tem variaveis para ser substituida!");
+                    return;
+                }
+                selectedHeader = indexHeader;
                 SetHeaderRuleInactive();
                 SetHeaderNotSelected();
                 SetHeaderActive();
-                selectedHeader = indexHeader;
                 changeStep(2);
             }
         }
         //Step 2 - Selecionar uma variavel para ser alterada
         if (Step == 2)
         {
-            if (!selectHeaderHasMoreThanTwoVariables(selectedHeader))
-            {
-                //Se não tiver mais de duas variaveis deve voltar para o estágio 1
-                changeStep(1);
-                Debug.Log("Essa regra ta OK!");
-                return;
-            }
             if (!setupStep)
             {
                 Debug.Log("Iniciando Step 2");
@@ -216,6 +220,20 @@ public class Stage1 : MonoBehaviour
             if (selectedObjects.Count > 1)
             {
                 currentReplaceVariable2 = selectedObjects[1];
+                if (CountTwoRulesIntoGrammar(currentReplaceVariable.name, currentReplaceVariable2.name) <= 1)
+                {
+                    //Aviso: Esses simbolos não podem ser substituidos
+                    alertController.startTimer("Esses simbolos não tem outras aparições");
+                    SetTargetRulesActive(selectedHeader);
+                    SetRuleNotSelected(selectedHeader);
+                    SetTargetRulesActiveAndNotSelectedAndFixPosition(selectedHeader);
+                    currentReplaceVariable = null;
+                    currentReplaceVariable2 = null;
+                    GenericText.text = "";
+                    SetCurrentRuleInactive();
+                    changeStep(1);
+                    return;
+                }
                 changeStep(3);
                 SetCurrentRuleInactive();
             }
@@ -241,30 +259,39 @@ public class Stage1 : MonoBehaviour
                 SetHeaderRuleActive();
                 setupStep = true;
             }
-            if (!FindTwoRulesIntoGrammar(currentReplaceString, currentReplaceString2))
-            {
-                Debug.Log($"String1: {currentReplaceString}, String2: {currentReplaceString2}");
-                Debug.Log("Essa regra não tem as duas variaveis!");
-                changeStep(1);
-                return;
-            }
             int indexHeader = IsSomeHeaderSelected();
             if (indexHeader != -1)
             {
                 GameObject rule1 = symbolRules[indexHeader].Find(x => x.name == currentReplaceString);
                 GameObject rule2 = symbolRules[indexHeader].Find(x => x.name == currentReplaceString2);
-                Debug.Log(rule1);
-                Debug.Log(rule2);
                 if (rule1 != null && rule2 != null)
                 {
                     replaceTwoRulesByDefaultRule(rule1, rule2, indexHeader);
                 }
                 else
                 {
+                    alertController.startTimer("Está regra não tem os simbolos para substituir");
                     SetHeaderNotSelected();
                     SetHeaderActive();
                 }
             }
+        }
+    }
+
+    void SetRuleNotSelected(int index)
+    {
+        foreach (GameObject rule in symbolRules[index])
+        {
+            rule.GetComponent<TargetMovimentation>().selected = false;
+        }
+    }
+
+    void SetTargetRulesActiveAndNotSelectedAndFixPosition(int index){
+        foreach (GameObject rule in symbolRules[index])
+        {
+            rule.SetActive(true);
+            rule.GetComponent<TargetMovimentation>().selected = false;
+            rule.transform.position = new Vector3(rule.transform.position.x, rule.transform.position.y, defaultTarget.transform.position.z);
         }
     }
 
@@ -279,7 +306,6 @@ public class Stage1 : MonoBehaviour
 
     void changeStep(int step)
     {
-        Debug.Log($"Indo para a etapa: {step}");
         UpdateVisibleGramar();
         SetHeaderNotSelected();
         Step = step;
@@ -503,6 +529,14 @@ public class Stage1 : MonoBehaviour
         }
     }
 
+    void SetTargetRulesActive(int index)
+    {
+        foreach (GameObject rule in symbolRules[index])
+        {
+            rule.SetActive(true);
+        }
+    }
+
     void SetAllTargetRulesActive()
     {
         for (int i = 0; i < headerRules.Length; i++)
@@ -547,6 +581,31 @@ public class Stage1 : MonoBehaviour
             currentRule = null;
         }
         return false;
+    }
+
+    int CountTwoRulesIntoGrammar(string rule1, string rule2)
+    {
+        int qtd = 0;
+        GameObject lastRule = null;
+        GameObject currentRule = null;
+        for (int i = 0; i < headerRules.Length; i++)
+        {
+            foreach (GameObject rule in symbolRules[i])
+            {
+                lastRule = currentRule;
+                currentRule = rule;
+                if (lastRule != null && currentRule != null)
+                {
+                    if (lastRule.name == rule1 && currentRule.name == rule2)
+                    {
+                        qtd++;
+                    }
+                }
+            }
+            lastRule = null;
+            currentRule = null;
+        }
+        return qtd;
     }
 
     string GramarToString()

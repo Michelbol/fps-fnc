@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\AlertController.cs" />
      <Compile Include="Assets\Scripts\AmmunationController.cs" />
      <Compile Include="Assets\Scripts\FPSController.cs" />
      <Compile Include="Assets\Scripts\FPSMouse.cs" />
