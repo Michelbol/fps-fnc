@@ -3,20 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class Utils : MonoBehaviour
+public class Utils
 {
     private float time;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public bool startTimer(GameObject[] ObjectstoActive, GameObject[] ObjectstoInactive, GameObject Timer, int maxSeconds = 0)
     {

@@ -11,12 +11,12 @@ public class Grammar : MonoBehaviour
     // Game Object having all header rules
     private GameObject parentHeaderRules;
     // Object into Fase with all rules, used to select when hit into a header
-    private GameObject[] rules;
+    private List<GameObject> rules;
     // Is Game Object of headers to hit
-    private GameObject[] headerRules;
+    private List<GameObject> headerRules;
     // Inside of rules has N symbolRules is the terminal symbol
     private List<List<GameObject>> symbolRules;
-    
+
     private Quaternion defaultQuartenion = Quaternion.Euler(-90, -180, 0);
 
     private Vector3 defaultVector3 = new Vector3(-3f, 3.45f, 0f);
@@ -26,6 +26,8 @@ public class Grammar : MonoBehaviour
     private float DistanceIntoTargets = 3f;
 
     public string newRuleName = "C";
+
+    private List<string> newRulesName = new List<string> { "X", "Y", "W", "Z" };
 
     void DestroyRules()
     {
@@ -105,8 +107,8 @@ public class Grammar : MonoBehaviour
         DestroyHeaderRules();
         DestroySymbolRules();
         var gramarSplitComma = StringGrammar.Split(',');
-        rules = new GameObject[gramarSplitComma.Length];
-        headerRules = new GameObject[gramarSplitComma.Length];
+        rules = new List<GameObject>();
+        headerRules = new List<GameObject>();
         symbolRules = new List<List<GameObject>>();
         parentHeaderRules = CreateEmptyObject(
             gameObject.transform,
@@ -117,12 +119,13 @@ public class Grammar : MonoBehaviour
         {
             string[] chars = gramarSplitComma[j].Replace(" ", "").Split(new string[] { "->" }, StringSplitOptions.None);
 
-            rules[j] = CreateEmptyObject(transform, chars[0], false);
+            rules.Add(CreateEmptyObject(transform, chars[0], false));
 
-            headerRules[j] = CreateDefaultObject(
+            headerRules.Add(CreateDefaultObject(
                 parentHeaderRules.transform,
                 chars[0].ToString(),
                 new Vector3(defaultVector3.x + (DistanceIntoTargets * j), defaultVector3.y, defaultVector3.z)
+                )
                 );
 
             List<GameObject> ruleJ = new List<GameObject>();
@@ -186,6 +189,53 @@ public class Grammar : MonoBehaviour
         deleteVisibleRule(headerIndex, objectsToDelete);
     }
 
+    public GameObject replaceTerminalRuleByDefaultRule(GameObject rule, int headerIndex)
+    {
+        int index = symbolRules[headerIndex].FindIndex(x => x == rule);
+        GameObject newRule = CreateDefaultObject(
+                rules[headerIndex].transform,
+                newRulesName[0],
+                defaultVector3,
+                false
+            );
+        symbolRules[headerIndex].Insert(
+            index,
+            newRule
+        );
+        newRulesName.RemoveAt(0);
+        List<GameObject> objectsToDelete = new List<GameObject>();
+        objectsToDelete.Add(rule);
+        deleteVisibleRule(headerIndex, objectsToDelete);
+        return newRule;
+    }
+
+    public void createNewHeaderWithOneRule(string headerName, string ruleName)
+    {
+        rules.Add(CreateEmptyObject(transform, headerName, false));
+        headerRules.Add(
+                CreateDefaultObject(
+                    parentHeaderRules.transform,
+                    headerName,
+                    new Vector3(defaultVector3.x + (DistanceIntoTargets * rules.Count), defaultVector3.y, defaultVector3.z)
+                )
+            );
+
+        List<GameObject> ruleJ = new List<GameObject>();
+
+        ruleJ.Add(
+                CreateDefaultObject(
+                rules[(rules.Count)-1].transform,
+                ruleName,
+                new Vector3(
+                    defaultVector3.x + (DistanceIntoTargets),
+                    defaultVector3.y,
+                    defaultVector3.z
+                    )
+                )
+            );
+        symbolRules.Add(ruleJ);
+    }
+
     void deleteVisibleRule(int indexRule, List<GameObject> rules)
     {
         foreach (GameObject rule in rules)
@@ -215,7 +265,7 @@ public class Grammar : MonoBehaviour
     string GramarToString()
     {
         string FullGrammar = "Gramática";
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             FullGrammar = $"{FullGrammar}\n {headerRules[i].name} -> ";
             foreach (GameObject rule in symbolRules[i])
@@ -227,14 +277,14 @@ public class Grammar : MonoBehaviour
     }
 
 
-   public void UpdateVisibleGramar()
+    public void UpdateVisibleGramar()
     {
         GrammarVisible.text = GramarToString();
     }
 
     public bool IsAllHeadersWithTwoSymbols()
     {
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             if (symbolRules[i].Count > 2)
             {
@@ -263,7 +313,7 @@ public class Grammar : MonoBehaviour
 
     public int IsSomeHeaderSelected()
     {
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             if (headerRules[i].GetComponent<TargetMovimentation>().selected)
             {
@@ -275,7 +325,7 @@ public class Grammar : MonoBehaviour
 
     public void SetHeaderNotSelected()
     {
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             headerRules[i].GetComponent<TargetMovimentation>().selected = false;
         }
@@ -283,10 +333,22 @@ public class Grammar : MonoBehaviour
 
     public void SetHeaderActive()
     {
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             headerRules[i].SetActive(true);
         }
+    }
+
+    public bool selectHeaderHasOneTerminal(int index)
+    {
+        foreach (GameObject rule in symbolRules[index])
+        {
+            if (Char.IsLower(rule.name[0]))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -343,7 +405,7 @@ public class Grammar : MonoBehaviour
 
     void SetAllTargetRulesActive()
     {
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             foreach (GameObject rule in symbolRules[i])
             {
@@ -354,7 +416,7 @@ public class Grammar : MonoBehaviour
 
     void SetAllTargetRulesNotSelected()
     {
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             foreach (GameObject rule in symbolRules[i])
             {
@@ -367,7 +429,7 @@ public class Grammar : MonoBehaviour
     {
         GameObject lastRule = null;
         GameObject currentRule = null;
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             foreach (GameObject rule in symbolRules[i])
             {
@@ -387,12 +449,24 @@ public class Grammar : MonoBehaviour
         return false;
     }
 
+    public bool findRuleWithOnlyTerminal(string rule)
+    {
+        for (int i = 0; i < headerRules.Count; i++)
+        {
+            if (symbolRules[i].Count == 1 && symbolRules[i][0].name == rule)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int CountTwoRulesIntoGrammar(string rule1, string rule2)
     {
         int qtd = 0;
         GameObject lastRule = null;
         GameObject currentRule = null;
-        for (int i = 0; i < headerRules.Length; i++)
+        for (int i = 0; i < headerRules.Count; i++)
         {
             foreach (GameObject rule in symbolRules[i])
             {

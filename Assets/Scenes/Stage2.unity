@@ -133,6 +133,12 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1205939948}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &234207577 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2207642369819694826, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1205939948}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &313199094 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 102331968, guid: 35f61457f82e34a468e217e72c94f8ec,
@@ -232,6 +238,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19b4a482865997d40a9ab97c983acd02, type: 3}
+--- !u!114 &752938836 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2207642369867609096, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1205939948}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &773005628
 GameObject:
   m_ObjectHideFlags: 0
@@ -514,6 +532,12 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1205939948}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1349118295 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2207642368818925801, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1205939948}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1570795209
 GameObject:
   m_ObjectHideFlags: 0
@@ -790,14 +814,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfd74ec1e29e624438471bcc7275c1a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GenericText: {fileID: 752938836}
   TutorialOk: 0
   TutorialObjectTitle: {fileID: 1333790823}
   TutorialObjectRule: {fileID: 792329331}
   TutorialObjectHow: {fileID: 573566300}
   TutorialObjectReload: {fileID: 384758584}
   AmmoCounterPannel: {fileID: 162098661}
+  alert: {fileID: 1349118295}
   Tutorial: {fileID: 472599398}
   Target: {fileID: 102766525}
+  TimerLabel: {fileID: 234207577}
   grammar: {fileID: 1240015650}
 --- !u!4 &1946183204
 Transform:
