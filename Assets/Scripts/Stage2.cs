@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class Stage2 : MonoBehaviour
@@ -30,6 +28,10 @@ public class Stage2 : MonoBehaviour
 
     public GameObject Tutorial;
 
+    public GameObject Target;
+
+    public Grammar grammar;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +42,15 @@ public class Stage2 : MonoBehaviour
 
         AmmunationController = AmmoCounterPannel.GetComponent<AmmunationController>();
         AmmunationController.GameEnable = false;
+        grammar.ParseGramar();
+        grammar.UpdateVisibleGramar();
+    }
+
+    void resetGame()
+    {
+        grammar.ParseGramar();
+        Target.SetActive(false);
+        AmmunationController.GameEnable = false;
     }
 
     // Update is called once per frame
@@ -49,6 +60,8 @@ public class Stage2 : MonoBehaviour
         {
             return;
         }
+        AmmunationController.GameEnable = true;
+        Target.SetActive(true);
     }
 
     public void FinishTutorial()
@@ -58,3 +71,4 @@ public class Stage2 : MonoBehaviour
         Tutorial.SetActive(false);
     }
 }
+
