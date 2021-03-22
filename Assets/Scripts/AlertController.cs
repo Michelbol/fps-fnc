@@ -8,14 +8,21 @@ public class AlertController : MonoBehaviour
 
     public float time;
 
+    public float successTime;
+
     public bool active = false;
 
+    public bool successActive = false;
+
     [SerializeField] Text alert;
+
+    [SerializeField] Text successAlert;
 
     // Start is called before the first frame update
     void Start()
     {
         alert.enabled = false;
+        successAlert.enabled = false;
     }
 
     // Update is called once per frame
@@ -29,6 +36,16 @@ public class AlertController : MonoBehaviour
                 return;
             }
             alert.enabled = false;
+        }
+
+        if (successActive)
+        {
+            if (startTimerSuccess(3))
+            {
+                successAlert.enabled = true;
+                return;
+            }
+            successAlert.enabled = false;
         }
     }
 
@@ -44,9 +61,27 @@ public class AlertController : MonoBehaviour
         return true;
     }
 
+    bool startTimerSuccess(int maxSeconds = 0)
+    {
+        if (maxSeconds > 0 && (successTime + Time.deltaTime) % 60 > maxSeconds)
+        {
+            successTime = 0;
+            successActive = false;
+            return false;
+        }
+        successTime += Time.deltaTime;
+        return true;
+    }
+
     public void startTimer(string text)
     {
         alert.text = text;
         active = true;
+    }
+
+    public void successMessage(string text)
+    {
+        successAlert.text = text;
+        successActive = true;
     }
 }

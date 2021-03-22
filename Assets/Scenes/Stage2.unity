@@ -316,6 +316,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &781738480 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 963437050723253439, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1205939948}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &792329331 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2207642368355593702, guid: a3d061f4ce31fb04f86a6634e4f5176d,
@@ -335,6 +347,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 963437050723253439, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2207642368038753283, guid: a3d061f4ce31fb04f86a6634e4f5176d,
         type: 3}
       propertyPath: Camera
@@ -345,6 +362,21 @@ PrefabInstance:
       propertyPath: GunSound
       value: 
       objectReference: {fileID: 313199094}
+    - target: {fileID: 2207642368818925798, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2207642368818925799, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: successAlert
+      value: 
+      objectReference: {fileID: 781738480}
+    - target: {fileID: 2207642368818925801, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2207642368897288085, guid: a3d061f4ce31fb04f86a6634e4f5176d,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -465,6 +497,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 2745601268103434930, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2745601268103434930, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4694509680934140522, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+        type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a3d061f4ce31fb04f86a6634e4f5176d, type: 3}
 --- !u!114 &1205939949 stripped
@@ -538,6 +585,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1205939948}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1548732462 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4694509680934140522, guid: a3d061f4ce31fb04f86a6634e4f5176d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1205939948}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1570795209
 GameObject:
   m_ObjectHideFlags: 0
@@ -815,6 +874,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GenericText: {fileID: 752938836}
+  Description: {fileID: 1548732462}
   TutorialOk: 0
   TutorialObjectTitle: {fileID: 1333790823}
   TutorialObjectRule: {fileID: 792329331}

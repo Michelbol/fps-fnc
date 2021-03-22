@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Stage2 : MonoBehaviour
 {
     [SerializeField] Text GenericText;
+
+    [SerializeField] Text Description;
 
     public bool TutorialOk = false;
 
@@ -33,6 +36,10 @@ public class Stage2 : MonoBehaviour
 
     public GameObject AmmoCounterPannel;
     
+    private GameObject currentReplaceTerminal;
+
+    private string replaceName;
+
     private GameObject currentReplaceVariable;
 
     private AlertController alertController;
@@ -109,6 +116,7 @@ public class Stage2 : MonoBehaviour
             if (!setupStep)
             {
                 grammar.SetHeaderRuleActive();
+                Description.text = "Atire em uma Letra Maiúscula, que tenha letras mínusculas";
                 setupStep = true;
             }
             int indexHeader = grammar.IsSomeHeaderSelected();
@@ -119,7 +127,7 @@ public class Stage2 : MonoBehaviour
                     //AVISO: Gramática não pode ser substituida
                     grammar.SetHeaderNotSelected();
                     grammar.SetHeaderActive();
-                    alertController.startTimer("Essa regra não tem um terminal!");
+                    alertController.startTimer("Essa regra não tem uma letra minúscula!");
                     return;
                 }
                 selectedHeader = indexHeader;
@@ -135,11 +143,23 @@ public class Stage2 : MonoBehaviour
             {
                 currentRule = grammar.SetRuleActive(selectedHeader);
                 currentIndex = selectedHeader;
+                Description.text = "Atire em uma letra minúscula para substituirmos";
                 setupStep = true;
             }
             List<GameObject> selectedObjects = grammar.IsSomeRuleSelected(selectedHeader);
             if (selectedObjects.Count > 0)
             {
+                if (!char.IsLower(selectedObjects[0].name[0]))
+                {
+                    alertController.startTimer("Essa letra não é minúscula!");
+                    grammar.SetTargetRulesActive(selectedHeader);
+                    grammar.SetRuleNotSelected(selectedHeader);
+                    grammar.SetTargetRulesActiveAndNotSelectedAndFixPosition(selectedHeader);
+                    Description.text = "";
+                    grammar.SetCurrentRuleInactive(currentIndex);
+                    changeStep(1);
+                    return;
+                }
                 if (grammar.findRuleWithOnlyTerminal(selectedObjects[0].name))
                 {
                     //Aviso: Esses simbolos não podem ser substituidos
@@ -147,37 +167,84 @@ public class Stage2 : MonoBehaviour
                     grammar.SetTargetRulesActive(selectedHeader);
                     grammar.SetRuleNotSelected(selectedHeader);
                     grammar.SetTargetRulesActiveAndNotSelectedAndFixPosition(selectedHeader);
-                    GenericText.text = "";
+                    Description.text = "";
                     grammar.SetCurrentRuleInactive(currentIndex);
                     changeStep(1);
                     return;
                 }
-                currentReplaceVariable = selectedObjects[0];
+                currentReplaceTerminal = selectedObjects[0];
                 changeStep(3);
                 grammar.SetCurrentRuleInactive(currentIndex);
             }
         }
         if (Step == 3)
         {
+            if (IsFirstStepFinished())
+            {
+                alertController.successMessage("Parabéns!! Você conseguiu finalizar a segunda etapa!");
+                if (utils.setTimeOut(3))
+                {
+                    return;
+                }
+                Cursor.visible = true;
+                SceneManager.LoadScene("SuccessStage2");
+                return;
+            }
             if (!setupStep)
             {
-                GameObject newRule = grammar.replaceTerminalRuleByDefaultRule(currentReplaceVariable, currentIndex);
-                grammar.createNewHeaderWithOneRule(newRule.name, currentReplaceVariable.name);
+                replaceName = currentReplaceTerminal.name;
+                Description.text = "Atire nas regras que possuem a letra que atirou.";
+                GenericText.text = $"Letra: {replaceName}";
+                currentReplaceVariable = grammar.replaceTerminalRuleByDefaultRule(currentReplaceTerminal, currentIndex);
+                grammar.createNewHeaderWithOneRule(currentReplaceVariable.name, replaceName);
+                grammar.FixPosition(selectedHeader);
                 grammar.UpdateVisibleGramar();
                 grammar.SetHeaderRuleActive();
                 setupStep = true;
             }
+            if (grammar.findRuleWithOnlyTerminal(replaceName) && !grammar.HasMoreThanTwoRulesHavingTerminal(replaceName))
+            {
+                alertController.startTimer("Não tem mais nenhuma regra para selecionar, faça isso para a próxima");
+                grammar.SetHeaderRuleInactive();
+                grammar.SetHeaderNotSelected();
+                grammar.SetHeaderActive();
+                changeStep(1);
+                return;
+            }
             int indexHeader = grammar.IsSomeHeaderSelected();
             if (indexHeader != -1)
             {
+                if (grammar.AreHeadersEquals(currentReplaceVariable.name, indexHeader))
+                {
+                    alertController.startTimer("Está regra é a nova regra, escolha outra");
+                    grammar.SetHeaderNotSelected();
+                    grammar.SetHeaderActive();
+                    return;
+                }
+                var obj = grammar.FindSymbolRulesByHeaderAndName(indexHeader, replaceName);
+                if(obj == null)
+                {
+                    alertController.startTimer("Está regra não tem a letra selecionada");
+                    grammar.SetHeaderNotSelected();
+                    grammar.SetHeaderActive();
+                    return;
+                }
+                grammar.replaceTerminalRuleByVariable(obj, currentReplaceVariable.name, indexHeader);
+                grammar.UpdateVisibleGramar();
+                grammar.SetHeaderRuleActive();
+                grammar.FixPosition(selectedHeader);
+                grammar.FixPositionHeaders();
             }
         }
     }
 
     void changeStep(int step)
     {
+        GenericText.text = "";
+        Description.text = "";
         grammar.UpdateVisibleGramar();
         grammar.SetHeaderNotSelected();
+        grammar.FixPositionHeaders();
         Step = step;
         setupStep = false;
     }
@@ -187,6 +254,11 @@ public class Stage2 : MonoBehaviour
         TutorialOk = true;
         Cursor.visible = false;
         Tutorial.SetActive(false);
+    }
+
+    bool IsFirstStepFinished()
+    {
+        return grammar.IsAllTerminalsSeparatedAndSingle();
     }
 }
 

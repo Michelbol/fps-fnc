@@ -152,11 +152,28 @@ public class Grammar : MonoBehaviour
     {
         return symbolRules[header].Find(x => x.name == name);
     }
+
     public void SetRuleNotSelected(int index)
     {
         foreach (GameObject rule in symbolRules[index])
         {
             rule.GetComponent<TargetMovimentation>().selected = false;
+        }
+    }
+
+    public void FixPosition(int index)
+    {
+        foreach (GameObject rule in symbolRules[index])
+        {
+            rule.transform.position = new Vector3(rule.transform.position.x, rule.transform.position.y, defaultTarget.transform.position.z);
+        }
+    }
+
+    public void FixPositionHeaders()
+    {
+        foreach (GameObject rule in headerRules)
+        {
+            rule.transform.position = new Vector3(rule.transform.position.x, rule.transform.position.y, defaultTarget.transform.position.z);
         }
     }
 
@@ -187,6 +204,31 @@ public class Grammar : MonoBehaviour
         objectsToDelete.Add(rule1);
         objectsToDelete.Add(rule2);
         deleteVisibleRule(headerIndex, objectsToDelete);
+    }
+
+    public GameObject replaceTerminalRuleByVariable(GameObject rule, string ruleReplaceName, int headerIndex)
+    {
+        int index = symbolRules[headerIndex].FindIndex(x => x == rule);
+        GameObject newRule = CreateDefaultObject(
+                rules[headerIndex].transform,
+                ruleReplaceName,
+                defaultVector3,
+                false
+            );
+        symbolRules[headerIndex].Insert(
+            index,
+            newRule
+        );
+        List<GameObject> objectsToDelete = new List<GameObject>();
+        objectsToDelete.Add(rule);
+        deleteVisibleRule(headerIndex, objectsToDelete);
+        return newRule;
+    }
+
+
+    public bool AreHeadersEquals(string headerName, int indexHeader)
+    {
+        return headerName == rules[indexHeader].name;
     }
 
     public GameObject replaceTerminalRuleByDefaultRule(GameObject rule, int headerIndex)
@@ -234,6 +276,7 @@ public class Grammar : MonoBehaviour
                 )
             );
         symbolRules.Add(ruleJ);
+        FixDistanceHeaders();
     }
 
     void deleteVisibleRule(int indexRule, List<GameObject> rules)
@@ -254,6 +297,16 @@ public class Grammar : MonoBehaviour
     {
         int i = 1;
         foreach (GameObject rule in symbolRules[index])
+        {
+            rule.transform.position = new Vector3(defaultVector3.x + (DistanceIntoTargets * i), defaultVector3.y, defaultVector3.z);
+            i++;
+        }
+    }
+
+    void FixDistanceHeaders()
+    {
+        int i = 0;
+        foreach (GameObject rule in headerRules)
         {
             rule.transform.position = new Vector3(defaultVector3.x + (DistanceIntoTargets * i), defaultVector3.y, defaultVector3.z);
             i++;
@@ -461,6 +514,43 @@ public class Grammar : MonoBehaviour
         return false;
     }
 
+    public int CountRulesHavingTerminal(string terminal)
+    {
+        int qtd = 0;
+        for (int i = 0; i < headerRules.Count; i++)
+        {
+            foreach (GameObject rule in symbolRules[i])
+            {
+                if (rule.name == terminal)
+                {
+                    qtd++;
+                }
+            }
+        }
+        return qtd;
+    }
+
+    public bool HasMoreThanTwoRulesHavingTerminal(string terminal)
+    {
+        int qtd = 0;
+        for (int i = 0; i < headerRules.Count; i++)
+        {
+            foreach (GameObject rule in symbolRules[i])
+            {
+                if (rule.name == terminal)
+                {
+                    qtd++;
+                }
+                if (qtd > 1)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     public int CountTwoRulesIntoGrammar(string rule1, string rule2)
     {
         int qtd = 0;
@@ -494,5 +584,29 @@ public class Grammar : MonoBehaviour
     public void SetHeaderRuleInactive()
     {
         parentHeaderRules.SetActive(false);
+    }
+
+    public bool IsAllTerminalsSeparatedAndSingle()
+    {
+        for (int i = 0; i < headerRules.Count; i++)
+        {
+            int qtdTerminal = 0;
+            foreach (GameObject rule in symbolRules[i])
+            {
+                if (Char.IsLower(rule.name[0]))
+                {
+                    qtdTerminal++;
+                }
+                if (qtdTerminal > 1)
+                {
+                    return false;
+                }
+                if (qtdTerminal == 1 && symbolRules[i].Count > 1)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

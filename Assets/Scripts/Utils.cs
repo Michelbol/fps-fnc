@@ -48,4 +48,15 @@ public class Utils
             ObjectToActive.SetActive(false);
         }
     }
+    public bool setTimeOut(int maxSeconds = 0)
+    {
+        if (maxSeconds > 0 && (time + Time.deltaTime) % 60 > maxSeconds)
+        {
+            time = 0;
+            return false;
+        }
+        time += Time.deltaTime;
+        return true;
+    }
+
 }

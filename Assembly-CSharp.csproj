@@ -57,6 +57,7 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\AlertController.cs" />
      <Compile Include="Assets\Scripts\AmmunationController.cs" />
+     <Compile Include="Assets\Scripts\DescriptionScript.cs" />
      <Compile Include="Assets\Scripts\FPSController.cs" />
      <Compile Include="Assets\Scripts\FPSMouse.cs" />
      <Compile Include="Assets\Scripts\Grammar.cs" />

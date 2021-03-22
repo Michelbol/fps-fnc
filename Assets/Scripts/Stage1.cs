@@ -9,6 +9,8 @@ public class Stage1 : MonoBehaviour
 
     [SerializeField] Text GenericText;
 
+    [SerializeField] Text Description;
+
     [SerializeField] Text TextStep;
 
     public GameObject TimerLabel;
@@ -132,8 +134,8 @@ public class Stage1 : MonoBehaviour
         {
             if (!setupStep)
             {
-                Debug.Log("Iniciando Step 1");
                 grammar.SetHeaderRuleActive();
+                Description.text = "Atire no Alvo que tem mais de Duas Letras Maiúsculas.";
                 setupStep = true;
             }
             int indexHeader = grammar.IsSomeHeaderSelected();
@@ -144,7 +146,7 @@ public class Stage1 : MonoBehaviour
                     //AVISO: Gramática não pode ser substituida
                     grammar.SetHeaderNotSelected();
                     grammar.SetHeaderActive();
-                    alertController.startTimer("Essa regra não tem variaveis para ser substituida!");
+                    alertController.startTimer("Esse Alvo não tem mais de duas letras maiúsculas!");
                     return;
                 }
                 selectedHeader = indexHeader;
@@ -159,10 +161,10 @@ public class Stage1 : MonoBehaviour
         {
             if (!setupStep)
             {
-                Debug.Log("Iniciando Step 2");
                 currentRule = grammar.SetRuleActive(selectedHeader);
                 currentIndex = selectedHeader;
                 setupStep = true;
+                Description.text = "Atire em duas Letras maiúsculas para substituir.";
                 GenericText.text = $"Nova Regra\n {grammar.newRuleName} -> ??";
             }
             List<GameObject> selectedObjects = grammar.IsSomeRuleSelected(selectedHeader);
@@ -171,6 +173,7 @@ public class Stage1 : MonoBehaviour
                 if (currentReplaceVariable == null)
                 {
                     currentReplaceVariable = selectedObjects[0];
+                    Description.text = "Selecione a segunda letra maiúscula para ser substituida.";
                     GenericText.text = $"Nova Regra\n {grammar.newRuleName} -> {currentReplaceVariable.name}?";
                 }
             }
@@ -180,12 +183,13 @@ public class Stage1 : MonoBehaviour
                 if (grammar.CountTwoRulesIntoGrammar(currentReplaceVariable.name, currentReplaceVariable2.name) <= 1)
                 {
                     //Aviso: Esses simbolos não podem ser substituidos
-                    alertController.startTimer("Esses simbolos não tem outras aparições");
+                    alertController.startTimer("Não existe essas letras em outras regras");
                     grammar.SetTargetRulesActive(selectedHeader);
                     grammar.SetRuleNotSelected(selectedHeader);
                     grammar.SetTargetRulesActiveAndNotSelectedAndFixPosition(selectedHeader);
                     currentReplaceVariable = null;
                     currentReplaceVariable2 = null;
+                    Description.text = "";
                     GenericText.text = "";
                     grammar.SetCurrentRuleInactive(currentIndex);
                     changeStep(1);
@@ -200,13 +204,18 @@ public class Stage1 : MonoBehaviour
         {
             if (IsFirstStepFinished())
             {
+                alertController.successMessage("Parabéns!! Você conseguiu finalizar a primeira etapa!");
+                if (utils.setTimeOut(3))
+                {
+                    return;
+                }
                 Cursor.visible = true;
                 SceneManager.LoadScene("SuccessStage1");
                 return;
             }
             if (!setupStep)
             {
-                Debug.Log("Iniciando Step 3");
+                Description.text = "Atire em outras regras que tenham as duas letras .";
                 GenericText.text = $"Nova Regra\n {grammar.newRuleName} -> {currentReplaceVariable.name}{currentReplaceVariable2.name}";
                 currentReplaceString = currentReplaceVariable.name;
                 currentReplaceString2 = currentReplaceVariable2.name;
@@ -227,7 +236,7 @@ public class Stage1 : MonoBehaviour
                 }
                 else
                 {
-                    alertController.startTimer("Está regra não tem os simbolos para substituir");
+                    alertController.startTimer("Está regra não tem as letras que selecionou");
                     grammar.SetHeaderNotSelected();
                     grammar.SetHeaderActive();
                 }
@@ -237,6 +246,7 @@ public class Stage1 : MonoBehaviour
 
     void ClearNewRuleText()
     {
+        Description.text = "";
         GenericText.text = "";
         currentReplaceVariable = null;
         currentReplaceVariable2 = null;

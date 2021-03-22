@@ -22,6 +22,11 @@ public class LoadScenes : MonoBehaviour
         SceneManager.LoadScene("Stage1");
     }
 
+    public void loadStageTwo()
+    {
+        SceneManager.LoadScene("Stage2");
+    }
+
     public void exitGame()
     {
         #if UNITY_EDITOR
